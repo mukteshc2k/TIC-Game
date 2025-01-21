@@ -1,20 +1,20 @@
-Name: Build,Analyze,Deploy
+name: Build, Analyze, Deploy
 
-On:
+on:
   push:
     branches:
       - main
-	  
-Jobs:
+
+jobs:
   build-analyze-scan:
     name: build
-    runs-on: [Self-hosted]
-    steps: 
+    runs-on: [self-hosted]
+    steps:
       - name: checkout the code
         uses: action/checkout@v2
-	with:
-	  fetch-depth: 0
-		 
+        with:
+          fetch-depth: 0
+
       - name: Build and analyze with sonarqube
 	uses:sonarsource/sonarqube-action-@master
 	env:
