@@ -3,67 +3,67 @@ Name: Build,Analyze,Deploy
 On:
   push:
     branches:
-	  - main
+      - main
 	  
 Jobs:
   build-analyze-scan:
     name: build
-	runs-on: [Self-hosted]
-	steps: 
-	  - name: checkout the code
-	    uses: action/checkout@v2
-		with:
-		  fetch-depth: 0
+    runs-on: [Self-hosted]
+    steps: 
+      - name: checkout the code
+        uses: action/checkout@v2
+	with:
+	  fetch-depth: 0
 		 
-	  - name: Build and analyze with sonarqube
-	    uses:sonarsource/sonarqube-action-@master
-		env:
-		  SONAR_Token: ${{secrets.SONAR_Token}}
-		  SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}
+      - name: Build and analyze with sonarqube
+	uses:sonarsource/sonarqube-action-@master
+	env:
+          SONAR_Token: ${{secrets.SONAR_Token}}
+	  SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}
 		  
-	  - name: npm install Dependency
-	    run: npm install
+      - name: npm install Dependency
+	run: npm install
 		
-	  - name: File scan with trivy
-	    run: trivy fs . >trivyfs.txt
+      - name: File scan with trivy
+	run: trivy fs . >trivyfs.txt
 	   
-	  - name: Docker build and push
-	    run: |
-		  docker build -t tic-tac .
-		  docker tag tic-tac muktesh/tic-tac:latest
-		  docker login -u ${{secrets.DOCKERHUB_USERNAME}} -p {{secrets.DOCKERHUB_Token}}
-		  Docker push muktesh/tic-tac:latest
-		env:
-		  DOCKER_CLI_ACI:1
+      - name: Docker build and push
+	run: |
+	  docker build -t tic-tac .
+	  docker tag tic-tac muktesh/tic-tac:latest
+	  docker login -u ${{secrets.DOCKERHUB_USERNAME}} -p {{secrets.DOCKERHUB_Token}}
+	  Docker push muktesh/tic-tac:latest
+	env:
+	  DOCKER_CLI_ACI:1
 		  
-	  - name: Image scan with trivy
-	    run: trivy image muktesh/tic-tac:latest > trivyimage.txt
+      - name: Image scan with trivy
+	run: trivy image muktesh/tic-tac:latest > trivyimage.txt
 		
   Deploy:
     needs: build-analyze-scan:
-	runs-on: [self-hosted]
-	steps:
-	  - name: docker pull image
-	    run: docker pull muktesh/tic-tac:latest
+    runs-on: [self-hosted]
+    steps:
+      - name: docker pull image
+        run: docker pull muktesh/tic-tac:latest
 		
-	  - name: image scan
+      - name: image scan
         run: trivy image muktesh/tic-tac:latest > trivyimagedeploy.txt
 
       - name: Deploy to container
-		run: docker run -d --name game -p 3000:3000 muktesh/tic-tac:latest
+        run: docker run -d --name game -p 3000:3000 muktesh/tic-tac:latest
 		
-	  - name: update kubeconfig
-	    run: aws eks --region us-east-1 update-kubeconfig --name my-eks-cluster
+      - name: update kubeconfig
+        run: aws eks --region us-east-1 update-kubeconfig --name my-eks-cluster
 		
-	  - name: Deploy to kubernetes 
-	    run: kubectl apply -f deployment.service.yml
+      - name: Deploy to kubernetes 
+        run: kubectl apply -f deployment.service.yml
 		
       - name: Send a slack notification
-	    if: always()
-		uses: action/slack@v1
-		with:
-		  status: ${{job_status}}
-		  steps: ${{toJson(steps)}}
-		  channel: '#githubactions-eks'
-		env:
-		  SLACK_WEBHOOK_URL: ${{ Secrets.SLACK_WEBHOOK_URL}}
+        if: always()
+        uses: action/slack@v1
+        with:
+	 status: ${{job_status}}
+	 steps: ${{toJson(steps)}}
+	 channel: '#githubactions-eks'
+	env:
+	  SLACK_WEBHOOK_URL: ${{ Secrets.SLACK_WEBHOOK_URL}}
