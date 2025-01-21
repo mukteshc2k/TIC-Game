@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: web-app-dr
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: mumbai
+            server: https://<mumbai-cluster-endpoint>
+            environments:
+              - dev
+              - qa
+              - stage
+              - prod
+          - cluster: singapore
+            server: https://<singapore-cluster-endpoint>
+            environments:
+              - dev
+              - qa
+              - stage
+              - prod
+  template:
+    metadata:
+      name: '{{cluster}}-{{environments}}-web-app'
+    spec:
+      project: muktesh_product
+      source:
+        repoURL: 'https://github.com/<your-org>/web-app-k8s-manifests.git'
+        targetRevision: main
+        path: base/
+      destination:
+        server: '{{server}}'
+        namespace: '{{environments}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
