@@ -26,7 +26,7 @@ spec:
     spec:
       project: muktesh_product
       source:
-        repoURL: 'https://github.com/<your-org>/web-app-k8s-manifests.git'
+        repoURL: 'https://github.com/mukteshc2k/TIC-Game.git'
         targetRevision: main
         path: base/
       destination:
