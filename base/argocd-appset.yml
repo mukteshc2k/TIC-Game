@@ -10,16 +10,16 @@ spec:
             server: https://<mumbai-cluster-endpoint>
             environments:
               - dev
-              - qa
-              - stage
-              - prod
-          - cluster: singapore
-            server: https://<singapore-cluster-endpoint>
-            environments:
-              - dev
-              - qa
-              - stage
-              - prod
+  #            - qa
+  #            - stage
+  #            - prod
+  #       - cluster: singapore
+  #          server: https://<singapore-cluster-endpoint>
+  #          environments:
+  #            - dev
+  #            - qa
+  #            - stage
+  #            - prod
   template:
     metadata:
       name: '{{cluster}}-{{environments}}-web-app'
