@@ -7,4 +7,4 @@ spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: web-app
+      app: tic-tac-toe
